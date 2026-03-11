@@ -1,13 +1,156 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
+    <title>F1 2026 - Vista Previa</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #e10600; /* Rojo oficial de F1 */
+        text-align: center;
+      }
+      .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      button {
+        background-color: #15151e;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: #e10600;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #e10600;
+      }
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+      }
+      .card p {
+        margin: 6px 0;
+        color: #555;
+        font-size: 0.95rem;
+      }
+      .message {
+        text-align: center;
+        grid-column: 1 / -1;
+        font-size: 1.1rem;
+        color: #666;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <h1>🏁 Datos Temporada F1 2026</h1>
+
+    <div class="buttons">
+      <button onclick="fetchData('drivers')">🏎️ Ver Pilotos</button>
+      <button onclick="fetchData('constructors')">🏗️ Ver Equipos</button>
+      <button onclick="fetchData('races')">📅 Ver Calendario</button>
+    </div>
+
+    <div id="results" class="grid">
+      <p class="message">
+        Haz clic en un botón para cargar los datos desde tu servidor local.
+      </p>
+    </div>
+
+    <script>
+      async function fetchData(endpoint) {
+        const resultsDiv = document.getElementById('results')
+        resultsDiv.innerHTML = '<p class="message">Cargando datos...</p>'
+
+        try {
+          // Hacemos la petición a tu servidor local
+          const response = await fetch(`http://localhost:3000/api/${endpoint}`)
+
+          if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`)
+          }
+
+          const data = await response.json()
+          resultsDiv.innerHTML = '' // Limpiamos el mensaje de carga
+
+          if (data.length === 0) {
+            resultsDiv.innerHTML =
+              '<p class="message">No hay datos en la base de datos.</p>'
+            return
+          }
+
+          // Recorremos los datos y creamos una tarjeta para cada uno
+          data.forEach((item) => {
+            const card = document.createElement('div')
+            card.className = 'card'
+
+            // Condicionamos el contenido según lo que estemos consultando
+            if (endpoint === 'drivers') {
+              card.innerHTML = `
+                            <h3>${item.fullname}</h3>
+                            <p><strong>Número:</strong> ${item.number || 'Sin asignar'}</p>
+                            <p><strong>Nacionalidad:</strong> ${item.country}</p>
+                            <p><strong>Código:</strong> ${item.code || 'N/A'}</p>
+                        `
+            } else if (endpoint === 'constructors') {
+              card.innerHTML = `
+                            <h3>${item.name}</h3>
+                            <p><strong>Nacionalidad:</strong> ${item.nationality}</p>
+                        `
+            } else if (endpoint === 'races') {
+              // Formateamos la fecha para que sea más legible
+              const dateObj = new Date(item.date)
+              const formattedDate = dateObj.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+
+              card.innerHTML = `
+                            <h3>Ronda ${item.round}: ${item.name}</h3>
+                            <p><strong>Fecha:</strong> ${formattedDate}</p>
+                            <p><strong>Circuito:</strong> ${item.circuit_name}</p>
+                            <p><strong>Ubicación:</strong> ${item.city}, ${item.country}</p>
+                        `
+            }
+
+            resultsDiv.appendChild(card)
+          })
+        } catch (error) {
+          console.error('Error al obtener los datos:', error)
+          resultsDiv.innerHTML =
+            '<p class="message" style="color: #e10600;">❌ Error al conectar con el servidor. ¿Te aseguraste de que Express está ejecutándose en el puerto 3000?</p>'
+        }
+      }
+    </script>
   </body>
 </html>
