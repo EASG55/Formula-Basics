@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import axios from 'axios'
+import { useAuth } from '../hooks/useAuth'
 
 export default function ModuleLessons() {
   const { id } = useParams()
+  const { user } = useAuth()
+
   const [lessons, setLessons] = useState([])
   const [error, setError] = useState('')
+  const [completedLessons, setCompletedLessons] = useState([])
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -20,6 +24,22 @@ export default function ModuleLessons() {
     }
     fetchLessons()
   }, [id])
+
+  const marcarCompletada = async (lessonId) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/progress', {
+        user_id: user.id,
+        lesson_id: lessonId
+      })
+
+      if (response.status === 201) {
+        setCompletedLessons((prev) => [...prev, lessonId])
+      }
+    } catch (error) {
+      console.error('Error al guardar progreso', error)
+      // Opcional: Podrías mostrar un mensaje de error en la UI si falla
+    }
+  }
 
   return (
     <div className='page-container'>
@@ -43,6 +63,16 @@ export default function ModuleLessons() {
           <div key={lesson.id} className='lesson-card'>
             <h3 className='lesson-title'>{lesson.title}</h3>
             <div className='lesson-content'>{lesson.content_text}</div>
+
+            <button
+              className={`btn-complete ${completedLessons.includes(lesson.id) ? 'completed' : ''}`}
+              onClick={() => marcarCompletada(lesson.id)}
+              disabled={completedLessons.includes(lesson.id)}
+            >
+              {completedLessons.includes(lesson.id)
+                ? '✅ Completada'
+                : 'Marcar como Completada'}
+            </button>
           </div>
         ))}
       </div>

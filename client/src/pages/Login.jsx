@@ -19,7 +19,7 @@ export default function Login() {
         email,
         password
       })
-      login(res.data.token)
+      login(res.data.token, res.data.user)
       navigate('/') // Redirige al Home (Paddock) si hay éxito
     } catch (err) {
       setError(err.response?.data?.error || 'Error al iniciar sesión')

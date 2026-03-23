@@ -96,9 +96,28 @@ app.get('/api/lessons/:moduleId', async (req, res) => {
   }
 })
 
+// 6. Guardar progreso del usuario
+app.post('/api/progress', async (req, res) => {
+  try {
+    const { user_id, lesson_id } = req.body
+
+    await db.query(
+      'INSERT INTO user_progress (user_id, lesson_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [user_id, lesson_id]
+    )
+
+    res.status(201).json({ message: 'Progreso guardado exitosamente' })
+  } catch (error) {
+    console.error('Error al guardar el progreso:', error.message)
+    res
+      .status(500)
+      .json({ error: 'Error interno del servidor al guardar el progreso' })
+  }
+})
+
 // --- ENDPOINTS DE AUTENTICACIÓN ---
 
-// 6. Registro de usuario
+// 7. Registro de usuario
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password } = req.body
@@ -131,7 +150,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 })
 
-// 7. Login de usuario
+// 8. Login de usuario
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body
@@ -154,7 +173,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET || 'secreto_de_desarrollo', // Valor por defecto temporal si falla el .env
+      process.env.JWT_SECRET || 'secreto_de_desarrollo',
       { expiresIn: '24h' }
     )
 
