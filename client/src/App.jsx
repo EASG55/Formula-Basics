@@ -6,6 +6,8 @@ import Register from './pages/Register'
 import Navbar from './components/Navbar'
 import Drivers from './pages/Drivers'
 import Races from './pages/Races'
+import Academy from './pages/Academy'
+import ModuleLessons from './pages/ModuleLessons'
 import './App.css'
 
 const ProtectedRoute = ({ children }) => {
@@ -63,6 +65,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Races />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/academy'
+            element={
+              <ProtectedRoute>
+                <Academy />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/academy/module/:id'
+            element={
+              <ProtectedRoute>
+                <ModuleLessons />
               </ProtectedRoute>
             }
           />

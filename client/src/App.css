@@ -131,3 +131,99 @@
   font-weight: bold;
   letter-spacing: 1px;
 }
+/* --- ESTILOS PARA LA ACADEMIA --- */
+.academy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.academy-card {
+  background-color: #1f1f27;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-top: 5px solid #007bff; /* Azul para diferenciar la academia */
+  display: flex;
+  flex-direction: column;
+}
+
+.academy-title {
+  margin: 0 0 15px 0;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.academy-description {
+  color: #aaa;
+  margin-bottom: 25px;
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+.btn-enter-module {
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btn-enter-module:hover {
+  background-color: #0056b3;
+}
+
+/* --- ESTILOS PARA LAS LECCIONES --- */
+.lessons-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid #e10600;
+  margin-bottom: 30px;
+}
+
+.lessons-header .page-title {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 15px;
+}
+
+.btn-back {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-back:hover {
+  color: #fff;
+}
+
+.lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.lesson-card {
+  background-color: #1f1f27;
+  padding: 30px;
+  border-radius: 12px;
+  border-left: 5px solid #007bff;
+}
+
+.lesson-title {
+  color: #ffffff;
+  margin: 0 0 20px 0;
+  font-size: 24px;
+}
+
+.lesson-content {
+  color: #ddd;
+  line-height: 1.8;
+  font-size: 16px;
+  white-space: pre-line; /* Respeta los saltos de línea del texto de la BD */
+}

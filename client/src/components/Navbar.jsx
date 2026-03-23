@@ -17,6 +17,9 @@ export default function Navbar() {
         <Link to='/races' className='navbar-link'>
           Calendario
         </Link>
+        <Link to='/academy' className='navbar-link'>
+          Academia
+        </Link>
         <button onClick={logout} className='btn-logout'>
           Salir
         </button>
