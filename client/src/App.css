@@ -1,42 +1,133 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.page-container {
+  width: 100%;
+}
+
+.page-title {
+  color: #e10600;
+  border-bottom: 2px solid #e10600;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.error-message {
+  color: #ff4444;
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 4px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.empty-message {
+  text-align: center;
+  color: #aaa;
+  margin-top: 50px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.driver-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.driver-card {
+  background-color: #1f1f27;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  border-top: 5px solid #e10600;
+  transition: transform 0.2s;
 }
 
-.card {
-  padding: 2em;
+.driver-number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #e10600;
+  margin-bottom: 10px;
+  font-family: monospace;
 }
 
-.read-the-docs {
-  color: #888;
+.driver-name {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.driver-country {
+  margin: 0;
+  color: #aaa;
+  font-size: 16px;
+}
+
+.table-card {
+  background-color: #1f1f27;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  border-top: 5px solid #e10600;
+}
+
+.f1-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.f1-table th {
+  background-color: #f1f1f1;
+  color: #15151e;
+  padding: 20px;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: left;
+  letter-spacing: 1px;
+}
+
+.f1-table tr {
+  border-bottom: 1px solid #333;
+}
+
+.td-round {
+  padding: 20px;
+  color: #e10600;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.td-name {
+  padding: 20px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.td-circuit,
+.td-date {
+  padding: 20px;
+  color: #aaa;
+  font-size: 16px;
+}
+
+/* --- ESTILOS PARA LA PRÓXIMA CARRERA --- */
+.tr-next-race {
+  background-color: rgba(225, 6, 0, 0.15);
+  border-left: 4px solid #e10600;
+}
+
+.badge-next {
+  background-color: #e10600;
+  color: white;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: 15px;
+  vertical-align: middle;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
