@@ -13,18 +13,21 @@ app.use(express.json())
 
 // --- ENDPOINTS DE F1 ---
 
-// 1. Obtener todos los pilotos
+// 1. Obtener todos los pilotos (con datos de la escudería)
 app.get('/api/drivers', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM drivers')
+    // Usamos LEFT JOIN para traer el nombre del constructor
+    // Cambiamos 'pool' por 'db' 👇
+    const result = await db.query(`
+      SELECT d.*, c.name AS team_name 
+      FROM drivers d 
+      LEFT JOIN constructors c ON d.constructor_id = c.id 
+      ORDER BY d.fullname ASC
+    `)
     res.json(result.rows)
-  } catch (error) {
-    console.error('Error al obtener los pilotos:', error.message)
-    res
-      .status(500)
-      .json({
-        error: 'Error interno del servidor al consultar la base de datos'
-      })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al obtener pilotos' })
   }
 })
 
@@ -35,11 +38,9 @@ app.get('/api/constructors', async (req, res) => {
     res.json(result.rows)
   } catch (error) {
     console.error('Error al obtener los constructores:', error.message)
-    res
-      .status(500)
-      .json({
-        error: 'Error interno del servidor al consultar la base de datos'
-      })
+    res.status(500).json({
+      error: 'Error interno del servidor al consultar la base de datos'
+    })
   }
 })
 
@@ -50,11 +51,9 @@ app.get('/api/races', async (req, res) => {
     res.json(result.rows)
   } catch (error) {
     console.error('Error al obtener las carreras:', error.message)
-    res
-      .status(500)
-      .json({
-        error: 'Error interno del servidor al consultar la base de datos'
-      })
+    res.status(500).json({
+      error: 'Error interno del servidor al consultar la base de datos'
+    })
   }
 })
 
@@ -69,11 +68,9 @@ app.get('/api/modules', async (req, res) => {
     res.status(200).json(result.rows)
   } catch (error) {
     console.error('Error al obtener los módulos:', error.message)
-    res
-      .status(500)
-      .json({
-        error: 'Error interno del servidor al consultar la base de datos'
-      })
+    res.status(500).json({
+      error: 'Error interno del servidor al consultar la base de datos'
+    })
   }
 })
 
@@ -88,11 +85,9 @@ app.get('/api/lessons/:moduleId', async (req, res) => {
     res.status(200).json(result.rows)
   } catch (error) {
     console.error('Error al obtener las lecciones:', error.message)
-    res
-      .status(500)
-      .json({
-        error: 'Error interno del servidor al consultar la base de datos'
-      })
+    res.status(500).json({
+      error: 'Error interno del servidor al consultar la base de datos'
+    })
   }
 })
 
