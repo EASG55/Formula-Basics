@@ -1,254 +1,378 @@
+/* ==========================================
+   🏎️ FORMULA BASICS - GLOBAL STYLESHEET
+   Autor: Director Técnico (AI Assistant)
+   Descripción: Hoja de estilos principal. Unifica la identidad 
+   visual, las rejillas responsivas y las animaciones de la app.
+   ========================================== */
+
+/* ==========================================
+   1. VARIABLES, FUENTES Y RESETEO BASE
+   ========================================== */
+/* Importamos la fuente oficial (Montserrat) en múltiples grosores (hasta 900 para los dorsales) */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400;1,900&display=swap');
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  background-color: #15151e; /* Fondo oscuro oficial de F1 */
+  color: #fff;
+}
+
+button,
+input,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+}
+
+/* Scrollbar personalizado estilo asfalto / fibra de carbono */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #15151e;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e10600;
+}
+
+/* ==========================================
+   2. CONTENEDORES GLOBALES DE ESTRUCTURA
+   ========================================== */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex: 1;
+}
+
+/* Contenedor principal para todas las páginas internas */
 .page-container {
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
+/* Título de sección con la clásica línea roja subrayada */
 .page-title {
-  color: #e10600;
-  border-bottom: 2px solid #e10600;
-  padding-bottom: 15px;
+  color: #fff;
+  border-bottom: 3px solid #e10600;
+  padding-bottom: 10px;
   margin-bottom: 30px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: -1px;
+  font-weight: 800;
+  font-size: 2rem;
+  display: inline-block;
 }
 
+/* ==========================================
+   3. MENSAJES DE ESTADO Y BOTONES
+   ========================================== */
 .error-message {
   color: #ff4444;
-  background-color: rgba(255, 0, 0, 0.1);
-  padding: 10px;
-  border-radius: 4px;
-  text-align: center;
+  background-color: rgba(255, 68, 68, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #ff4444;
+  font-weight: 600;
   margin-bottom: 20px;
 }
-
 .empty-message {
   text-align: center;
   color: #aaa;
   margin-top: 50px;
+  font-size: 1.2rem;
 }
 
-.driver-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
-}
-
-.driver-card {
-  background-color: #1f1f27;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  border-top: 5px solid #e10600;
-  transition: transform 0.2s;
-}
-
-.driver-number {
-  font-size: 36px;
-  font-weight: bold;
-  color: #e10600;
-  margin-bottom: 10px;
-  font-family: monospace;
-}
-
-.driver-name {
-  margin: 0 0 10px 0;
-  font-size: 20px;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.driver-country {
-  margin: 0;
-  color: #aaa;
-  font-size: 16px;
-}
-
-.table-card {
-  background-color: #1f1f27;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  border-top: 5px solid #e10600;
-}
-
-.f1-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.f1-table th {
-  background-color: #f1f1f1;
-  color: #15151e;
-  padding: 20px;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-weight: bold;
-  text-align: left;
-  letter-spacing: 1px;
-}
-
-.f1-table tr {
-  border-bottom: 1px solid #333;
-}
-
-.td-round {
-  padding: 20px;
-  color: #e10600;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: monospace;
-}
-
-.td-name {
-  padding: 20px;
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.td-circuit,
-.td-date {
-  padding: 20px;
-  color: #aaa;
-  font-size: 16px;
-}
-
-/* --- ESTILOS PARA LA PRÓXIMA CARRERA --- */
-.tr-next-race {
-  background-color: rgba(225, 6, 0, 0.15);
-  border-left: 4px solid #e10600;
-}
-
-.badge-next {
+/* Botón de acción principal (Rojo F1) */
+.btn-primary {
+  padding: 12px 20px;
   background-color: #e10600;
   color: white;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-left: 15px;
-  vertical-align: middle;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-/* --- ESTILOS PARA LA ACADEMIA --- */
-.academy-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
-}
-
-.academy-card {
-  background-color: #1f1f27;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  border-top: 5px solid #007bff; /* Azul para diferenciar la academia */
-  display: flex;
-  flex-direction: column;
-}
-
-.academy-title {
-  margin: 0 0 15px 0;
-  color: #ffffff;
-  font-size: 22px;
-}
-
-.academy-description {
-  color: #aaa;
-  margin-bottom: 25px;
-  flex-grow: 1;
-  line-height: 1.5;
-}
-
-.btn-enter-module {
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.btn-enter-module:hover {
-  background-color: #0056b3;
-}
-
-/* --- ESTILOS PARA LAS LECCIONES --- */
-.lessons-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  border-bottom: 2px solid #e10600;
-  margin-bottom: 30px;
-}
-
-.lessons-header .page-title {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 15px;
-}
-
-.btn-back {
-  color: #aaa;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.btn-back:hover {
-  color: #fff;
-}
-
-.lessons-list {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.lesson-card {
-  background-color: #1f1f27;
-  padding: 30px;
-  border-radius: 12px;
-  border-left: 5px solid #007bff;
-}
-
-.lesson-title {
-  color: #ffffff;
-  margin: 0 0 20px 0;
-  font-size: 24px;
-}
-
-.lesson-content {
-  color: #ddd;
-  line-height: 1.8;
-  font-size: 16px;
-  white-space: pre-line; /* Respeta los saltos de línea del texto de la BD */
-}
-
-/* --- ESTILOS PARA EL BOTÓN DE PROGRESO --- */
-.btn-complete {
-  margin-top: 25px;
-  padding: 12px 20px;
-  background-color: #333;
-  color: white;
-  border: 1px solid #555;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.2s ease-in-out;
-  display: block;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: #cc0000;
+  transform: scale(1.02);
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.btn-complete:hover:not(:disabled) {
-  background-color: #444;
-  border-color: #666;
+/* ==========================================
+   4. COMPONENTES DE AUTENTICACIÓN (Box de Acceso)
+   ========================================== */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:
+    linear-gradient(rgba(15, 15, 20, 0.8), rgba(15, 15, 20, 0.9)),
+    url('/assets/login-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.auth-card {
+  background-color: #1f1f27;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  border-top: 5px solid #e10600;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+.auth-input {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #2a2a35;
+  color: #fff;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
 }
 
-.btn-complete.completed {
-  background-color: #28a745;
-  border-color: #28a745;
-  cursor: default;
+/* ==========================================
+   5. SISTEMA DE REJILLAS (GRIDS)
+   ========================================== */
+/* Grid de 3 columnas: Ideal para Pilotos, Equipos y Academia */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+/* Grid de 2 columnas (2x2): Exclusivo para el Bento Box del Home */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+/* Tarjeta moderna con efecto de elevación (Hover) */
+.modern-card {
+  background-color: #1f1f27;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.modern-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================
+   6. CAJAS DE TELEMETRÍA (Estadísticas en Modales)
+   ========================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 30px 0;
+  width: 100%;
+}
+.stat-box {
+  background-color: #2a2a35;
+  padding: 20px 10px;
+  border-radius: 12px;
+  text-align: center;
+}
+.stat-title {
+  margin: 0;
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.stat-value {
+  margin: 10px 0 0 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+/* ==========================================
+   7. LISTAS EN FILA (Clasificación Mundial y Calendario)
+   ========================================== */
+.list-row {
+  display: flex;
+  align-items: center;
+  padding: 15px 25px;
+  background-color: #1f1f27;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  transition: transform 0.2s;
+}
+.pos-number {
+  font-size: 32px;
+  font-weight: 800;
+  width: 50px;
+}
+
+/* ==========================================
+   8. MODALES FLOTANTES (Glassmorphism)
+   ========================================== */
+.glass-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+.glass-modal {
+  background-color: #1f1f27;
+  padding: 35px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ==========================================
+   9. WIDGETS EDUCATIVOS (Inyectados en Lecciones)
+   ========================================== */
+.widget-container {
+  background-color: #0f172a;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  padding: 25px;
+  margin: 30px 0;
+  border-radius: 8px;
+  text-align: center;
+  color: #60a5fa;
+}
+.widget-title {
+  margin: 0 0 15px 0;
+  color: #fff;
+  font-size: 18px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 10px;
+}
+
+/* ==========================================
+   10. IDENTIDAD DE COMPETICIÓN (Dorsales y Logos)
+   ========================================== */
+/* Dorsal del Piloto: Extra grueso (900), itálico y posicionado en la esquina */
+.driver-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 26px;
+  font-weight: 900;
+  font-style: italic;
+  font-family: 'Montserrat', sans-serif;
+  background-color: rgba(20, 20, 25, 0.8);
+  padding: 4px 12px;
+  border-radius: 8px;
+  letter-spacing: -2px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+.driver-name {
+  margin: 10px 0 5px 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+/* Escudos de Equipo: Contenedor estricto para que los logos PNG no se deformen */
+.team-logo-container {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 15px;
+  box-sizing: border-box;
+}
+.team-logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ==========================================
+   11. ANIMACIONES Y EFECTOS VARIOS
+   ========================================== */
+/* Animación de la línea inferior roja en la barra de navegación */
+.nav-link {
+  position: relative;
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  padding-bottom: 4px;
+}
+.nav-link:hover {
+  color: #fff;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: #e10600;
+  transition: width 0.3s ease-in-out;
+  border-radius: 2px;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

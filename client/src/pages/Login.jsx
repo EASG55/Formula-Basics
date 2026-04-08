@@ -1,110 +1,90 @@
+/**
+ * 🔑 COMPONENTE: LOGIN
+ * Pantalla de inicio de sesión de acceso restringido.
+ * Envía credenciales al Backend y, si son correctas, guarda el
+ * "Pase de Paddock" (Token JWT) en la memoria del navegador.
+ */
+
 import { useState } from 'react'
-import axios from 'axios'
-// Antes: import { AuthContext } from '../context/AuthContext';
-import { useAuth } from '../hooks/useAuth'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import api from '../utils/axiosConfig'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  // Antes: const { login } = useContext(AuthContext);
-  const { login } = useAuth()
-  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const res = await axios.post('http://localhost:3000/api/auth/login', {
-        email,
-        password
-      })
-      login(res.data.token, res.data.user)
-      navigate('/') // Redirige al Home (Paddock) si hay éxito
+      const response = await api.post('/auth/login', { email, password })
+
+      // Guardamos la llave maestra (Token JWT) en local
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+
+      // Hacemos un reload puro para que el componente "ProtectedRoute" detecte el token nuevo
+      window.location.href = '/'
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión')
+      setError(
+        err.response?.data?.error ||
+          'Contraseña incorrecta o piloto no registrado.'
+      )
     }
   }
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2 style={{ textAlign: 'center' }}>Iniciar Sesión 🏎️</h2>
-        {error && <p style={styles.error}>{error}</p>}
+    <div className='auth-bg'>
+      <div className='auth-card'>
+        <h1 style={{ margin: '0 0 10px 0', fontSize: '28px' }}>
+          🏎️ Formula Basics
+        </h1>
+        <p style={{ color: '#aaa', marginBottom: '30px' }}>
+          Inicia sesión en tu telemetría
+        </p>
 
-        <input
-          style={styles.input}
-          type='email'
-          placeholder='Email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          style={styles.input}
-          type='password'
-          placeholder='Contraseña'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {error && <p className='error-message'>{error}</p>}
 
-        <button style={styles.button} type='submit'>
-          Entrar al Paddock
-        </button>
-        <p style={{ textAlign: 'center', marginTop: '15px' }}>
-          ¿No tienes cuenta?{' '}
-          <Link to='/register' style={{ color: '#e10600' }}>
-            Regístrate
+        <form onSubmit={handleSubmit}>
+          <input
+            className='auth-input'
+            type='email'
+            placeholder='Email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            className='auth-input'
+            type='password'
+            placeholder='Contraseña'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type='submit'
+            className='btn-primary'
+            style={{ width: '100%', marginTop: '10px' }}
+          >
+            Arrancar el Motor
+          </button>
+        </form>
+
+        <p style={{ marginTop: '20px', color: '#aaa', fontSize: '14px' }}>
+          ¿No tienes superlicencia?{' '}
+          <Link
+            to='/register'
+            style={{
+              color: '#e10600',
+              fontWeight: 'bold',
+              textDecoration: 'none'
+            }}
+          >
+            Regístrate aquí
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   )
-}
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f4f4f9',
-    fontFamily: 'system-ui'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '2rem',
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-    width: '320px'
-  },
-  input: {
-    margin: '10px 0',
-    padding: '12px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    fontSize: '14px'
-  },
-  button: {
-    padding: '12px',
-    marginTop: '10px',
-    backgroundColor: '#e10600',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    fontSize: '16px'
-  },
-  error: {
-    color: '#d32f2f',
-    fontSize: '14px',
-    backgroundColor: '#ffebee',
-    padding: '10px',
-    borderRadius: '4px',
-    textAlign: 'center'
-  }
 }

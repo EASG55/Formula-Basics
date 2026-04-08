@@ -5,6 +5,9 @@ node_modules/
 .env
 .env.*
 
+standings_backup.json
+stats_backup.json
+
 # Logs del sistema
 npm-debug.log*
 *.log
