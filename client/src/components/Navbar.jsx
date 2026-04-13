@@ -7,9 +7,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../utils/axiosConfig'
+
 export default function Navbar() {
   // --- ESTADOS (Memoria del Piloto) ---
   const [xp, setXp] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false) // Estado para el menú hamburguesa
 
   // Recuperamos la sesión activa desde el almacenamiento local
   const userStr = localStorage.getItem('user')
@@ -86,7 +88,7 @@ export default function Navbar() {
 
   useEffect(() => {
     fetchXP()
-    // 🚀 Escuchador Mágico: Si la Academia grita "xpUpdated", el Navbar se actualiza solo
+    // Escuchador Mágico: Si la Academia grita "xpUpdated", el Navbar se actualiza solo
     window.addEventListener('xpUpdated', fetchXP)
     return () => window.removeEventListener('xpUpdated', fetchXP)
   }, [user?.id])
@@ -135,6 +137,7 @@ export default function Navbar() {
       {/* 2. Barra de Revoluciones (Gamificación) */}
       {user && (
         <div
+          className='xp-container'
           style={{
             flex: 1,
             maxWidth: '300px',
@@ -185,26 +188,55 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* 3. Menú de Navegación Rápida */}
-      <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-        <Link to='/academy' className='nav-link' style={{ color: '#005AFF' }}>
+      {/* Botón Hamburguesa para Móviles */}
+      <button className='hamburger' onClick={() => setMenuOpen(!menuOpen)}>
+        {menuOpen ? '✖' : '☰'}
+      </button>
+
+      {/* 3. Menú de Navegación */}
+      <div className={`nav-links ${menuOpen ? 'active' : ''}`}>
+        <Link
+          to='/academy'
+          className='nav-link'
+          style={{ color: '#005AFF' }}
+          onClick={() => setMenuOpen(false)}
+        >
           Academia
         </Link>
-        <Link to='/drivers' className='nav-link'>
+        <Link
+          to='/drivers'
+          className='nav-link'
+          onClick={() => setMenuOpen(false)}
+        >
           Pilotos
         </Link>
-        <Link to='/teams' className='nav-link'>
+        <Link
+          to='/teams'
+          className='nav-link'
+          onClick={() => setMenuOpen(false)}
+        >
           Equipos
         </Link>
-        <Link to='/standings' className='nav-link'>
+        <Link
+          to='/standings'
+          className='nav-link'
+          onClick={() => setMenuOpen(false)}
+        >
           Mundial
         </Link>
-        <Link to='/races' className='nav-link'>
+        <Link
+          to='/races'
+          className='nav-link'
+          onClick={() => setMenuOpen(false)}
+        >
           Calendario
         </Link>
         <button
           className='btn-primary'
-          onClick={handleLogout}
+          onClick={() => {
+            setMenuOpen(false)
+            handleLogout()
+          }}
           style={{ padding: '8px 18px', marginLeft: '10px' }}
         >
           Salir
