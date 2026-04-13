@@ -2,7 +2,7 @@
  * 🏎️ FORMULA BASICS - BACKEND SERVER
  * Archivo principal del servidor Node.js/Express.
  * Gestiona la API, la base de datos, la autenticación de usuarios
- * y los procesos en segundo plano (CRON) para la caché de datos de F1.
+ * y los procesos en segundo plano (CRON) automatizados semanalmente.
  */
 
 // ==========================================
@@ -10,36 +10,30 @@
 // ==========================================
 const express = require('express')
 const cors = require('cors')
-const db = require('./db.js') // Conexión a PostgreSQL
-const bcrypt = require('bcrypt') // Para encriptar contraseñas
-const jwt = require('jsonwebtoken') // Para tokens de sesión
-const fs = require('fs') // File System: para leer/escribir caché
-const path = require('path') // Utilidad para rutas seguras de archivos
-const cron = require('node-cron') // Programador de tareas en segundo plano
-const axios = require('axios') // Para peticiones HTTP a la API de Jolpica
+const db = require('./db.js')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const fs = require('fs')
+const path = require('path')
+const cron = require('node-cron')
+const axios = require('axios')
+const { exec } = require('child_process') // 🔧 NUEVO: Permite ejecutar scripts desde el servidor
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// Middlewares globales
 app.use(cors())
 app.use(express.json())
 
-// Rutas absolutas para los archivos de caché local
 const STANDINGS_FILE = path.join(__dirname, 'standings_backup.json')
 const STATS_FILE = path.join(__dirname, 'stats_backup.json')
 
-// Función de utilidad: Pausa la ejecución (ms) para no saturar APIs externas
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // ==========================================
 // 2. SISTEMA DE CACHÉ AUTOMATIZADO (CRON JOBS)
 // ==========================================
 
-/**
- * 🤖 MECÁNICO 1: Clasificación del Mundial en Vivo
- * Descarga la tabla de puntos actual y la guarda en disco.
- */
 const fetchAndSaveStandings = async () => {
   console.log('🤖 Mecánico 1: Descargando Mundial en vivo...')
   try {
@@ -67,14 +61,9 @@ const fetchAndSaveStandings = async () => {
   }
 }
 
-/**
- * 📊 MECÁNICO 2: Archivista Histórico (Pilotos y Equipos)
- * Recopila victorias y podios históricos. Incluye sistema
- * anti-saturación (Rate Limiting) con auto-reintento.
- */
 const fetchAndSaveHistoricalStats = async () => {
   console.log(
-    '📊 Mecánico 2: Recopilando estadísticas (Modo Anti-Saturación. Tardará ~2 min)...'
+    '📊 Mecánico 2: Recopilando estadísticas (Modo Anti-Saturación)...'
   )
   try {
     const driversRes = await db.query('SELECT external_id FROM drivers')
@@ -86,7 +75,6 @@ const fetchAndSaveHistoricalStats = async () => {
       lastUpdate: new Date().toLocaleString()
     }
 
-    // Obtenemos los puntos actuales para no pedir 22 peticiones extra luego
     let currentStandings = []
     try {
       const std = await axios.get(
@@ -98,7 +86,6 @@ const fetchAndSaveHistoricalStats = async () => {
       console.log('⚠️ No se pudo descargar el mundial actual para los puntos.')
     }
 
-    // Función blindada con Auto-Reintento (Retries)
     const fetchTotal = async (url, retries = 3) => {
       for (let i = 0; i < retries; i++) {
         try {
@@ -111,16 +98,15 @@ const fetchAndSaveHistoricalStats = async () => {
             )
             await delay(3000)
           } else if (e.response && e.response.status === 404) {
-            return 0 // Equipo/Piloto nuevo sin historial (Ej: Audi)
+            return 0
           } else {
             return 0
           }
         }
       }
-      return 0 // Si fallan todos los reintentos
+      return 0
     }
 
-    // A. Procesar Pilotos (Con pausas de 1 segundo)
     console.log('🏎️ Procesando telemetría de pilotos...')
     for (const driver of driversRes.rows) {
       const extId = driver.external_id
@@ -148,7 +134,6 @@ const fetchAndSaveHistoricalStats = async () => {
       console.log(`   ✔️ Piloto ${extId} ok`)
     }
 
-    // B. Procesar Equipos
     console.log('🛡️ Procesando palmarés de escuderías...')
     const historicalChampionships = {
       ferrari: 16,
@@ -160,7 +145,9 @@ const fetchAndSaveHistoricalStats = async () => {
       alpine: 2,
       sauber: 0,
       haas: 0,
-      rb: 0
+      rb: 0,
+      audi: 0,
+      cadillac: 0
     }
 
     for (const team of teamsRes.rows) {
@@ -193,22 +180,46 @@ const fetchAndSaveHistoricalStats = async () => {
   }
 }
 
-// Programamos la ejecución automática cada hora (minuto 0)
-cron.schedule('0 * * * *', () => {
+// ==========================================
+// 3. PLANIFICADOR SEMANAL (CRON JOBS)
+// ==========================================
+
+// ⏱️ MECÁNICO 0: Ingesta Automática de Carreras a la Base de Datos
+// Se ejecuta TODOS LOS LUNES a las 01:00 AM
+cron.schedule('0 1 * * 1', () => {
+  console.log('🏗️ [Mecánico 0] Ejecutando auto-ingesta semanal de carreras...')
+  const scriptPath = path.join(__dirname, 'scripts', 'ingest_races.js')
+
+  exec(`node ${scriptPath}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`❌ Error en la auto-ingesta: ${error.message}`)
+      return
+    }
+    console.log(`✅ Auto-ingesta completada:\n${stdout}`)
+  })
+})
+
+// ⏱️ MECÁNICO 1: Caché de Clasificación
+// Se ejecuta TODOS LOS LUNES a las 02:00 AM
+cron.schedule('0 2 * * 1', () => {
   fetchAndSaveStandings()
+})
+
+// ⏱️ MECÁNICO 2: Caché de Estadísticas Históricas
+// Se ejecuta TODOS LOS LUNES a las 02:30 AM
+cron.schedule('30 2 * * 1', () => {
   fetchAndSaveHistoricalStats()
 })
 
-// Ejecución forzada al iniciar el servidor
-console.log('🚀 Arrancando motores y verificando telemetría inicial...')
+// Ejecución inicial de caché al arrancar (No ejecutamos la ingesta aquí para no sobrecargar Neon en cada reinicio)
+console.log('🚀 Arrancando motores y verificando telemetría en caché...')
 fetchAndSaveStandings()
 fetchAndSaveHistoricalStats()
 
 // ==========================================
-// 3. ENDPOINTS: CACHÉ LOCAL (Mundial y Stats)
+// 4. ENDPOINTS REST API
 // ==========================================
 
-// Obtener clasificación actual (Offline support)
 app.get('/api/standings', (req, res) => {
   try {
     if (fs.existsSync(STANDINGS_FILE)) {
@@ -221,7 +232,6 @@ app.get('/api/standings', (req, res) => {
   }
 })
 
-// Obtener estadísticas históricas (Offline support)
 app.get('/api/stats/:type/:id', (req, res) => {
   try {
     if (fs.existsSync(STATS_FILE)) {
@@ -239,10 +249,6 @@ app.get('/api/stats/:type/:id', (req, res) => {
     res.status(500).json({ error: 'Error leyendo caché del disco.' })
   }
 })
-
-// ==========================================
-// 4. ENDPOINTS: BASE DE DATOS F1 PRINCIPAL
-// ==========================================
 
 app.get('/api/drivers', async (req, res) => {
   try {
@@ -285,10 +291,6 @@ app.get('/api/races/:id/podium', async (req, res) => {
   }
 })
 
-// ==========================================
-// 5. ENDPOINTS: ACADEMIA Y GAMIFICACIÓN
-// ==========================================
-
 app.get('/api/modules', async (req, res) => {
   try {
     const result = await db.query(
@@ -312,7 +314,6 @@ app.get('/api/lessons/:moduleId', async (req, res) => {
   }
 })
 
-// Guardar progreso de lectura
 app.post('/api/progress', async (req, res) => {
   try {
     const userIdNum = parseInt(req.body.user_id)
@@ -330,7 +331,6 @@ app.post('/api/progress', async (req, res) => {
   }
 })
 
-// Calcular XP total del usuario
 app.get('/api/progress/:userId/xp', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId)
@@ -346,7 +346,6 @@ app.get('/api/progress/:userId/xp', async (req, res) => {
   }
 })
 
-// Comprobar qué lecciones completó un usuario
 app.get('/api/progress/:userId/:moduleId', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId)
@@ -362,10 +361,6 @@ app.get('/api/progress/:userId/:moduleId', async (req, res) => {
     res.status(500).json({ error: 'Error al recuperar progreso' })
   }
 })
-
-// ==========================================
-// 6. ENDPOINTS: AUTENTICACIÓN (JWT)
-// ==========================================
 
 app.post('/api/auth/register', async (req, res) => {
   try {
@@ -418,9 +413,6 @@ app.post('/api/auth/login', async (req, res) => {
   }
 })
 
-// ==========================================
-// 7. INICIO DEL SERVIDOR
-// ==========================================
 app.listen(PORT, () => {
   console.log(`Servidor F1 rodando en el puerto ${PORT} 🏎️`)
 })

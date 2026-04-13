@@ -1,10 +1,8 @@
 /**
- * 🏭 SCRIPT DE INGESTA DE DATOS (Data Pipeline)
- * Archivo ejecutable independiente (`node ingest.js`).
- * Se encarga de descargar masivamente toda la información base de la temporada 2026
- * desde la API de Jolpica (Equipos, Pilotos, Calendario, Resultados) y poblar nuestra
- * base de datos PostgreSQL. Utiliza sentencias UPSERT (ON CONFLICT DO UPDATE)
- * para evitar duplicados.
+ * 🏭 SCRIPT DE INGESTA BASE (Datos Maestros)
+ * Archivo: server/scripts/ingest.js
+ * Descarga y actualiza los Equipos (Constructores) y los Pilotos.
+ * Incluye un filtro de "Lista Negra" para evitar pilotos de reserva.
  */
 
 const axios = require('axios')
@@ -18,9 +16,7 @@ async function ingestConstructors() {
       'https://api.jolpi.ca/ergast/f1/2026/constructors.json'
     )
     const constructors = response.data.MRData.ConstructorTable.Constructors
-    let insertedCount = 0
 
-    // UPSERT: Si el external_id ya existe, solo actualizamos los datos
     const insertQuery = `
       INSERT INTO constructors (external_id, name, nationality)
       VALUES ($1, $2, $3)
@@ -29,20 +25,43 @@ async function ingestConstructors() {
         nationality = EXCLUDED.nationality;
     `
     for (const team of constructors) {
-      const result = await db.query(insertQuery, [
+      await db.query(insertQuery, [
         team.constructorId,
         team.name,
         team.nationality
       ])
-      if (result.rowCount > 0) insertedCount++
     }
-    console.log(`✅ Equipos procesados con éxito.`)
+    console.log(`✅ Equipos insertados/actualizados.`)
+
+    // 🔧 ACTUALIZACIÓN MANUAL DE SEDES (La API no provee este dato)
+    console.log('📍 Asignando sedes (Bases) a las escuderías...')
+    const bases = [
+      { id: 'ferrari', base: 'Maranello, Italia' },
+      { id: 'mercedes', base: 'Brackley, Reino Unido' },
+      { id: 'red_bull', base: 'Milton Keynes, Reino Unido' },
+      { id: 'mclaren', base: 'Woking, Reino Unido' },
+      { id: 'aston_martin', base: 'Silverstone, Reino Unido' },
+      { id: 'alpine', base: 'Enstone, Reino Unido' },
+      { id: 'williams', base: 'Grove, Reino Unido' },
+      { id: 'rb', base: 'Faenza, Italia' },
+      { id: 'audi', base: 'Hinwil, Suiza' },
+      { id: 'haas', base: 'Kannapolis, EE. UU.' },
+      { id: 'cadillac', base: 'Fishers, EE. UU.' }
+    ]
+
+    for (const b of bases) {
+      await db.query(
+        'UPDATE constructors SET base = $1 WHERE external_id = $2',
+        [b.base, b.id]
+      )
+    }
+    console.log(`✅ Sedes de los equipos actualizadas.`)
   } catch (error) {
     console.error('❌ Error en constructores:', error.message)
   }
 }
 
-// --- 2. INGESTA DE PILOTOS ---
+// --- 2. INGESTA DE PILOTOS (CON LISTA NEGRA) ---
 async function ingestDrivers() {
   try {
     console.log('🏎️  Obteniendo pilotos de la API de Jolpica...')
@@ -50,7 +69,9 @@ async function ingestDrivers() {
       'https://api.jolpi.ca/ergast/f1/2026/drivers.json'
     )
     const drivers = response.data.MRData.DriverTable.Drivers
-    let insertedCount = 0
+
+    // 🛑 LISTA NEGRA: Añade aquí los 'driverId' de los pilotos que NO quieres en tu app
+    const blacklist = ['jak_crawford'] // Ejemplo: Bloqueamos a Crawford y Bearman si son reservas
 
     const insertQuery = `
       INSERT INTO drivers (external_id, code, number, fullname, country)
@@ -59,136 +80,49 @@ async function ingestDrivers() {
         number = EXCLUDED.number,
         fullname = EXCLUDED.fullname;
     `
+    let insertedCount = 0
+    let ignoredCount = 0
+
     for (const driver of drivers) {
+      // 🛡️ Filtro de seguridad: Si el ID está en la lista negra, lo saltamos
+      if (blacklist.includes(driver.driverId)) {
+        console.log(
+          `⚠️ Ignorando piloto excluido: ${driver.givenName} ${driver.familyName}`
+        )
+        ignoredCount++
+        continue
+      }
+
       const fullname = `${driver.givenName} ${driver.familyName}`
-      const result = await db.query(insertQuery, [
+      await db.query(insertQuery, [
         driver.driverId,
         driver.code || null,
         driver.permanentNumber || null,
         fullname,
         driver.nationality
       ])
-      if (result.rowCount > 0) insertedCount++
+      insertedCount++
     }
-    console.log(`✅ Pilotos procesados con éxito.`)
+    console.log(
+      `✅ Pilotos guardados: ${insertedCount}. Ignorados: ${ignoredCount}. (El vínculo con sus equipos se hará al descargar las carreras)`
+    )
   } catch (error) {
     console.error('❌ Error en pilotos:', error.message)
   }
 }
 
-// --- 3. INGESTA DE CARRERAS (CALENDARIO) ---
-async function ingestRaces() {
-  try {
-    console.log('🏁 Obteniendo calendario de carreras de la API...')
-    const response = await axios.get('https://api.jolpi.ca/ergast/f1/2026.json')
-    const races = response.data.MRData.RaceTable.Races
-    let insertedCount = 0
-
-    const insertQuery = `
-      INSERT INTO races (external_id, round, name, date, circuit_name, city, country)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (external_id) DO UPDATE SET
-        date = EXCLUDED.date,
-        name = EXCLUDED.name;
-    `
-    for (const race of races) {
-      const result = await db.query(insertQuery, [
-        race.round.toString(), // Forzamos formato string
-        race.round,
-        race.raceName,
-        race.date,
-        race.Circuit.circuitName,
-        race.Circuit.Location.locality,
-        race.Circuit.Location.country
-      ])
-      if (result.rowCount > 0) insertedCount++
-    }
-    console.log(`✅ Calendario limpio y actualizado guardado.`)
-  } catch (error) {
-    console.error('❌ Error en carreras:', error.message)
-  }
-}
-
-// --- 4. INGESTA DE RESULTADOS DE CARRERA ---
-async function ingestRaceResults() {
-  try {
-    console.log('🏆 Obteniendo resultados históricos de la temporada...')
-    const response = await axios.get(
-      'https://api.jolpi.ca/ergast/f1/2026/results.json?limit=1000'
-    )
-    const resultsRaces = response.data.MRData.RaceTable.Races
-    let insertedCount = 0
-
-    for (const race of resultsRaces) {
-      // 4.1 Buscar ID interno de la carrera en nuestra DB
-      const dbRace = await db.query('SELECT id FROM races WHERE round = $1', [
-        race.round
-      ])
-      if (dbRace.rows.length === 0) continue
-      const raceId = dbRace.rows[0].id
-
-      for (const result of race.Results) {
-        // 4.2 Buscar IDs relacionales (Foreign Keys) de piloto y equipo
-        const dbDriver = await db.query(
-          'SELECT id FROM drivers WHERE external_id = $1',
-          [result.Driver.driverId]
-        )
-        const dbConstructor = await db.query(
-          'SELECT id FROM constructors WHERE external_id = $1',
-          [result.Constructor.constructorId]
-        )
-
-        if (dbDriver.rows.length > 0 && dbConstructor.rows.length > 0) {
-          const timeGap = result.Time ? result.Time.time : result.status // Recupera "+2.3s" o "Retired"
-
-          const query = `
-            INSERT INTO race_results (race_id, driver_id, constructor_id, position, points, grid, time_gap)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (race_id, driver_id) DO UPDATE SET
-              position = EXCLUDED.position,
-              time_gap = EXCLUDED.time_gap,
-              points = EXCLUDED.points
-          `
-          await db.query(query, [
-            raceId,
-            dbDriver.rows[0].id,
-            dbConstructor.rows[0].id,
-            result.position,
-            result.points,
-            result.grid,
-            timeGap
-          ])
-          insertedCount++
-        }
-      }
-    }
-    console.log(
-      `✅ Se han descargado todos los resultados de las carreras celebradas.`
-    )
-  } catch (error) {
-    console.error('❌ Error en resultados:', error.message)
-  }
-}
-
-// --- 5. ORQUESTADOR PRINCIPAL ---
-/**
- * Ejecuta todas las funciones de ingesta en orden secuencial
- * para respetar las dependencias (Foreign Keys) de PostgreSQL.
- */
-async function runAll() {
-  console.log('🚀 Iniciando proceso de ingesta masiva...')
+// --- ORQUESTADOR BASE ---
+async function runBaseIngest() {
+  console.log('🚀 Iniciando ingesta de Datos Maestros (Pilotos y Equipos)...')
   try {
     await ingestConstructors()
     await ingestDrivers()
-    await ingestRaces()
-    await ingestRaceResults()
-    console.log('🏆 ¡Toda la ingesta ha finalizado correctamente!')
+    console.log('🏁 Ingesta Base finalizada.')
   } catch (error) {
-    console.error('🛑 El proceso se detuvo por un error:', error.message)
+    console.error('🛑 Error crítico:', error.message)
   } finally {
-    console.log('🔌 Cerrando conexión a la base de datos...')
-    await db.end() // Libera el pool de conexiones de Postgres
+    await db.end()
   }
 }
 
-runAll()
+runBaseIngest()
