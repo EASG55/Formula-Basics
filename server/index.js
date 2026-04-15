@@ -220,6 +220,11 @@ fetchAndSaveHistoricalStats()
 // 4. ENDPOINTS REST API
 // ==========================================
 
+// 🟢 RUTA DE SALUD (Para mantener el servidor despierto)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'Motor encendido y corriendo' })
+})
+
 app.get('/api/standings', (req, res) => {
   try {
     if (fs.existsSync(STANDINGS_FILE)) {
