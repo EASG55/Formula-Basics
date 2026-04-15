@@ -7,13 +7,12 @@
 /* ==========================================
    1. VARIABLES, FUENTES Y RESETEO BASE
    ========================================== */
-/* Importamos la fuente oficial (Montserrat) en múltiples grosores (hasta 900 para los dorsales) */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400;1,900&display=swap');
 
 body {
   font-family: 'Montserrat', sans-serif;
   margin: 0;
-  background-color: #15151e; /* Fondo oscuro oficial de F1 */
+  background-color: #15151e;
   color: #fff;
 }
 
@@ -30,7 +29,6 @@ h6 {
   margin: 0;
 }
 
-/* Scrollbar personalizado estilo asfalto / fibra de carbono */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -57,17 +55,15 @@ h6 {
   flex: 1;
 }
 
-/* Contenedor principal para todas las páginas internas */
 .page-container {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 40px 20px;
-  box-sizing: border-box; /* Asegura que el padding no desborde en móvil */
+  box-sizing: border-box;
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* Título de sección con la clásica línea roja subrayada */
 .page-title {
   color: #fff;
   border-bottom: 3px solid #e10600;
@@ -99,7 +95,6 @@ h6 {
   font-size: 1.2rem;
 }
 
-/* Botón de acción principal (Rojo F1) */
 .btn-primary {
   padding: 12px 20px;
   background-color: #e10600;
@@ -136,7 +131,7 @@ h6 {
     url('/assets/login-bg.jpg');
   background-size: cover;
   background-position: center;
-  padding: 20px; /* Margen de seguridad para móviles */
+  padding: 20px;
   box-sizing: border-box;
 }
 .auth-card {
@@ -165,7 +160,6 @@ h6 {
 /* ==========================================
    5. SISTEMA DE REJILLAS (GRIDS)
    ========================================== */
-/* Grid de 3 columnas: Ideal para Pilotos, Equipos y Academia */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -173,14 +167,12 @@ h6 {
   margin-top: 20px;
 }
 
-/* Grid de 2 columnas (2x2): Exclusivo para el Bento Box del Home */
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 25px;
 }
 
-/* Tarjeta moderna con efecto de elevación (Hover) */
 .modern-card {
   background-color: #1f1f27;
   padding: 30px;
@@ -382,16 +374,15 @@ h6 {
 }
 
 /* ==========================================
-   12. 📱 DISEÑO RESPONSIVO (MÓVILES Y TABLETS)
+   12. 📱 DISEÑO RESPONSIVO EXTREMO (MÓVILES)
    ========================================== */
-/* Estilos por defecto del NAVBAR para PC (Escritorio) */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 .hamburger {
-  display: none; /* Oculto en PC */
+  display: none;
   background: none;
   border: none;
   color: white;
@@ -399,62 +390,130 @@ h6 {
   cursor: pointer;
 }
 
-/* Ajustes cuando la pantalla es menor a 768px (Móviles) */
 @media (max-width: 768px) {
-  /* 1. Reducir padding global y títulos */
+  /* 1. Reset de Padding y Tipografías Gigantes */
   .page-container {
     padding: 20px 15px;
   }
+
+  h1 {
+    font-size: 1.8rem !important;
+    line-height: 1.2;
+    margin-bottom: 15px;
+  }
+
   .page-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem !important;
+    line-height: 1.3;
+    margin-bottom: 20px;
   }
 
-  /* 2. Grillas a fila india (1 sola columna) */
+  p {
+    line-height: 1.6; /* Mejora lectura en modales y academia */
+  }
+
+  /* 2. Ajuste Quirúrgico de la Navbar */
+  nav {
+    padding: 10px 15px !important;
+    gap: 10px;
+  }
+
+  .navbar-brand a {
+    font-size: 16px !important; /* Logo F1 más pequeño */
+  }
+
+  /* Truco maestro: Forzamos la barra de XP (2º div) a encogerse */
+  nav > div:nth-child(2) {
+    margin: 0 5px !important;
+    padding: 6px 10px !important;
+    max-width: 140px !important;
+  }
+
+  nav > div:nth-child(2) span {
+    font-size: 9px !important; /* Textos de XP ajustados al contenedor */
+  }
+
+  /* 3. Grillas aplastadas a 1 columna */
   .grid-container,
-  .bento-grid,
-  .stats-grid {
+  .bento-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
-  /* 3. Ajuste de las Listas (Standings/Races) para que quepan */
+  /* 4. Forzar contenedores Flex horizontales a Verticales (Mundial Botones y Textos) */
+  .page-container > div[style*='flex'] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  /* Que los botones de las páginas ocupen todo el ancho en móvil */
+  .page-container > div[style*='flex'] button {
+    width: 100% !important;
+    padding: 15px !important;
+  }
+
+  /* 5. Ajuste interno de las listas de Clasificación */
   .list-row {
     padding: 12px 15px;
+    gap: 10px;
   }
   .pos-number {
     font-size: 24px;
     width: 35px;
   }
   .list-row h3 {
-    font-size: 16px !important;
+    font-size: 15px !important;
   }
   .list-row p {
-    font-size: 12px !important;
+    font-size: 11px !important;
   }
 
-  /* 4. Ajuste del Modal para que no desborde */
+  /* 6. Modales Flotantes más limpios */
   .glass-modal {
-    padding: 25px 15px;
+    padding: 20px 15px;
+    max-height: 90vh;
+    overflow-y: auto; /* Evita que los modales se salgan por arriba/abajo */
   }
 
-  /* 5. EL MENÚ HAMBURGUESA */
+  .glass-modal h2 {
+    font-size: 1.5rem !important; /* Nombres de pilotos más controlados */
+    margin-top: 5px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr; /* Apilamos las estadísticas verticalmente */
+    gap: 10px;
+    margin: 15px 0;
+  }
+
+  .stat-box {
+    padding: 12px 10px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  /* 7. Menú Hamburguesa Activo */
   .hamburger {
-    display: block; /* Mostramos el botón */
+    display: block;
+    margin-left: auto; /* Empuja la hamburguesa a la derecha si falta espacio */
   }
 
   .nav-links {
-    display: none; /* Ocultamos los enlaces por defecto */
+    display: none;
     flex-direction: column;
     position: absolute;
-    top: 70px; /* Debajo de la barra de navegación */
+    top: 60px; /* Anclado justo debajo de la barra reducida */
     left: 0;
     width: 100%;
     background-color: #1f1f27;
-    padding: 20px 0;
+    padding: 10px 0;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     z-index: 999;
   }
 
-  /* Cuando React le añade la clase 'active', se despliega */
   .nav-links.active {
     display: flex;
   }
@@ -464,5 +523,16 @@ h6 {
     width: 100%;
     text-align: center;
     box-sizing: border-box;
+  }
+
+  /* Botón salir dentro del menú móvil */
+  .nav-links button {
+    margin: 10px 20px !important;
+    width: calc(100% - 40px);
+  }
+
+  /* 8. Auth Box más compacto */
+  .auth-card {
+    padding: 30px 20px;
   }
 }

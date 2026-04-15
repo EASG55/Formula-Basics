@@ -1,8 +1,8 @@
 /**
  * 📝 COMPONENTE: REGISTER
  * Punto de captación de nuevos alumnos.
- * Recopila nombre, email y contraseña y los envía al backend
- * para ser almacenados de forma segura con encriptación Bcrypt.
+ * Recopila nombre, email y contraseña con validación estricta de formato,
+ * y los envía al backend para ser almacenados de forma segura con encriptación Bcrypt.
  */
 
 import { useState } from 'react'
@@ -18,6 +18,27 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('') // Limpiamos errores previos en cada intento
+
+    // 🛡️ 1. Validación de Formato de Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError(
+        '⚠️ Formato inválido: Introduce un correo real (ej: piloto@escuderia.com).'
+      )
+      return // Frenamos la ejecución, no se envía al backend
+    }
+
+    // 🛡️ 2. Validación de Contraseña Segura (Nivel FIA)
+    // Mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula y 1 número.
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
+    if (!passwordRegex.test(password)) {
+      setError(
+        '⚠️ Seguridad insuficiente: La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula y un número.'
+      )
+      return // Frenamos la ejecución
+    }
+
     try {
       await api.post('/auth/register', { username, email, password })
       // Una vez la licencia está creada en DB, lo mandamos al garaje a hacer Login normal
@@ -62,7 +83,7 @@ export default function Register() {
           <input
             className='auth-input'
             type='password'
-            placeholder='Contraseña'
+            placeholder='Contraseña segura'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
